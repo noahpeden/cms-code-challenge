@@ -7,8 +7,14 @@ class App extends Component {
     this.state = {
       input: '',
       gifs: [],
-      randomGif: [],
+      trending: [],
+      randomGif: null,
+      loading: true
     }
+  }
+
+  componentDidMount(){
+    setTimeout(() => this.setState({ loading: false }), 1500);
   }
 
   grabInput(e){
@@ -17,32 +23,74 @@ class App extends Component {
     })
   }
 
+  displayGif(){
+    if(this.state.randomGif){
+      return this.renderRandom()
+    }
+    else if (this.state.gifs.length > 0){
+      return this.mapGifs()
+    }
+    else if(this.state.trending.length > 0){
+      return this.mapTrending()
+    }
+  }
+
   randomGif(){
+    this.setState({
+      loading: true,
+    })
     let url = "http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag"
     fetch(url)
     .then((response)=> {
       return response.json()
     })
     .then((data)=> {
-      debugger;
       this.setState({
         randomGif: data.data,
+        loading: false,
       })
     })
   }
 
   renderRandom(){
-    return (<div><iframe src={`${this.state.randomGif.image_url}`} width="480" height="470.2040816326531" frameBorder="0" className="giphy-embed" ></iframe><p><a href={`${this.state.randomGif.url}`}>via GIPHY</a></p></div>)
+    return (<div><iframe src={`${this.state.randomGif.image_url}`} width="480" height="470.2040816326531" frameBorder="0" className="random" ></iframe><p><a href={`${this.state.randomGif.url}`}>via GIPHY</a></p></div>)
   }
 
   mapGifs(){
       let display = this.state.gifs.map((gif)=> {
-      return (<div><iframe src={`${gif.embed_url}`} width="100" height="100" frameBorder="0" className="giphy-embed" ></iframe><p><a href={`${gif.url}`}>via GIPHY</a></p></div>)
+      return (<div className="gif-frame"><iframe src={`${gif.embed_url}`} width="480" height="470.2040816326531" frameBorder="0" className="giphy-embed" ></iframe><p><a href={`${gif.url}`}>via GIPHY</a></p></div>)
+    })
+    return display;
+  }
+  mapTrending(){
+      let display = this.state.trending.map((gif)=> {
+      return (<div className="gif-frame"><iframe src={`${gif.embed_url}`} width="480" height="470.2040816326531" frameBorder="0" className="giphy-embed" ></iframe><p><a href={`${gif.url}`}>via GIPHY</a></p></div>)
     })
     return display;
   }
 
+  getTrending(){
+    this.setState({
+      loading: true,
+    })
+    let url = `http://api.giphy.com/v1/gifs/trending?api_key=dc6zaTOxFJmzC`
+    fetch(url)
+    .then((response)=> {
+      return response.json()
+    })
+    .then((data)=> {
+      this.setState({
+        trending: data.data,
+        randomGif: null,
+        loading: false,
+      })
+    })
+  }
+
   sendInput(){
+    this.setState({
+        loading: true,
+      })
     let url = `http://api.giphy.com/v1/gifs/search?q=${this.state.input}&api_key=dc6zaTOxFJmzC   `
     fetch(url)
     .then((response)=> {
@@ -50,12 +98,19 @@ class App extends Component {
     })
     .then((data)=> {
       this.setState({
-        randomGif: data.data,
+        gifs: data.data,
+        randomGif: null,
+        loading: false,
       })
+     this.refs.searchInput.value = "";
     })
   }
 
   render() {
+    const { loading } = this.state;
+    if(loading) {
+      return null; // render null when app is not ready
+    }
     return (
       <div className="App">
         <div className="container">
@@ -69,7 +124,7 @@ class App extends Component {
                 <div className="row">
                   <div className="col-sm-7">
                     <div className="input-group">
-                      <input type="text" className="form-control" onChange={(e)=> this.grabInput(e)} placeholder="Search for..."/>
+                      <input type="text" ref="searchInput" className="form-control" onChange={(e)=> this.grabInput(e)} placeholder="Search for..."/>
                       <span className="input-group-btn">
                         <button className="btn btn-secondary go" type="button" onClick={(e)=> this.sendInput()}>Go!</button>
                       </span>
@@ -77,11 +132,11 @@ class App extends Component {
                   </div>
                   <div className="col-sm-5">
                     <div className="btn-group btn-group-justified">
-                      <a href="#" className="btn btn-primary" onClick={(e)=> this.randomGif()}>
+                      <a href="#"className="btn btn-primary" onClick={(e)=> this.randomGif()}>
                         <span className="glyphicon glyphicon-random"></span>
                         Random
                       </a>
-                      <a href="#" className="btn btn-info">
+                      <a href="#" className="btn btn-info" onClick={(e)=> this.getTrending()}>
                         <span className="glyphicon glyphicon-sunglasses"></span>
                         Trending
                       </a>
@@ -91,8 +146,8 @@ class App extends Component {
               </div>
             </div>
           </div>
-          <div>{this.state.gifs ? this.mapGifs() : ""}
-            <div>{this.state.randomGif !== [] ? this.renderRandom() : ''}</div>
+          <div className="render-area">
+            {this.displayGif()}
         </div>
 
           <footer className="footer">
