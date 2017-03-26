@@ -50,6 +50,10 @@ class App extends Component {
         loading: false,
       })
     })
+    .catch((err) => {
+      console.log('error', err);
+     return <div>"something is wrong, this is an error"</div>
+    })
   }
 
   renderRandom(){
@@ -58,13 +62,14 @@ class App extends Component {
 
   mapGifs(){
       let display = this.state.gifs.map((gif)=> {
-      return (<div className="gif-frame"><iframe src={`${gif.embed_url}`} width="480" height="470.2040816326531" frameBorder="0" className="giphy-embed" ></iframe><p><a href={`${gif.url}`}>via GIPHY</a></p></div>)
+      return (
+        <div key={gif.id} className="gif-frame"><iframe src={`${gif.embed_url}`} width="480" height="470.2040816326531" frameBorder="0" className="giphy-embed"></iframe><p><a href={`${gif.url}`}>via GIPHY</a></p></div>)
     })
     return display;
   }
   mapTrending(){
       let display = this.state.trending.map((gif)=> {
-      return (<div className="gif-frame"><iframe src={`${gif.embed_url}`} width="480" height="470.2040816326531" frameBorder="0" className="giphy-embed" ></iframe><p><a href={`${gif.url}`}>via GIPHY</a></p></div>)
+      return (<div key={gif.id} className="gif-frame"><iframe src={`${gif.embed_url}`} width="480" height="470.2040816326531" frameBorder="0" className="giphy-embed" ></iframe><p><a href={`${gif.url}`}>via GIPHY</a></p></div>)
     })
     return display;
   }
@@ -85,6 +90,10 @@ class App extends Component {
         loading: false,
       })
     })
+    .catch((err) => {
+      console.log('error', err);
+     return <div>"something is wrong, this is an error"</div>
+    })
   }
 
   sendInput(){
@@ -103,6 +112,10 @@ class App extends Component {
         loading: false,
       })
      this.refs.searchInput.value = "";
+    })
+    .catch((err) => {
+      console.log('error', err);
+     return <div>"something is wrong, this is an error"</div>
     })
   }
 
